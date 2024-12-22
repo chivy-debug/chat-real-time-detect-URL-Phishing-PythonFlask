@@ -395,7 +395,7 @@ user_manager = user_manager.UserManager()
 
 @app.route('/')
 def login():
-    return render_template('login.html')
+    return render_template('index.html')
 
 
 @app.route('/chat')
@@ -407,7 +407,7 @@ def chat():
     return render_template('chat.html', username=username, active_users=active_users)
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/index', methods=['POST'])
 def handle_login():
     username = request.form.get('username')
 
