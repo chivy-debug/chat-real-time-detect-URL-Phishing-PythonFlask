@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Cộng đồng sinh viên </title>
+    <style>
+        body, html {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+			background-color: #f0f2f5;
+        }
+        .banner {
+            width: 100%;
+            height: 250px;
+            background-color: #003366;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+        .banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+            padding-top: 50px;
+        }
+        .login-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 350px;
+            text-align: center;
+        }
+        .login-container h2 {
+            color: #0d6efd;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        #username {
+            width: 92%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        #username:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13,110,253,0.2);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .login-btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        #error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: none;
+        }
+        #error-message.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .loading {
+            display: none;
+            margin: 10px auto;
+        }
+        .loading.show {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                width: 90%;
+                padding: 20px;
+            }
+            .banner {
+                height: 200px;
+            }
+            .container {
+                padding-top: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="container">
+        <div class="login-container">
+            <h2>Cộng đồng sinh viên </h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="text"
+                       id="username"
+                       placeholder="Nhập tên của bạn"
+                       required
+                       minlength="3"
+                       maxlength="20"
+                       pattern="[A-Za-z0-9_\-\s\u00C0-\u1EF9]+"
+                       title="Tên đăng nhập chỉ được chứa chữ cái, số, gạch dưới, gạch ngang">
+
+                </div>
+                <button type="submit" class="login-btn">
+                    <span class="btn-text">Đăng Nhập</span>
+                    <div class="loading">⌛</div>
+                </button>
+                <div id="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = this;
+            const username = document.getElementById('username');
+            const errorMessage = document.getElementById('error-message');
+            const submitButton = form.querySelector('.login-btn');
+            const loadingIndicator = form.querySelector('.loading');
+            const btnText = form.querySelector('.btn-text');
+
+            const usernameValue = username.value.trim();
+            if (!usernameValue) {
+                showError('Vui lòng nhập tên của bạn');
+                return;
+            }
+
+            submitButton.disabled = true;
+            btnText.style.display = 'none';
+            loadingIndicator.classList.add('show');
+            errorMessage.classList.remove('show');
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `username=${encodeURIComponent(usernameValue)}`
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    showError(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Đã xảy ra lỗi. Vui lòng thử lại.');
+            } finally {
+                submitButton.disabled = false;
+                btnText.style.display = 'inline';
+                loadingIndicator.classList.remove('show');
+            }
+        });
+
+        function showError(message) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('show');
+            void errorMessage.offsetWidth;
+            errorMessage.classList.add('show');
+        }
+
+        document.getElementById('username').addEventListener('input', function(e) {
+            const value = e.target.value;
+            // Cập nhật regex để cho phép tất cả các ký tự chữ cái (bao gồm có dấu) và các ký tự hợp lệ khác
+            if (value && !value.match(/^[A-Za-z0-9_\-\s\u00C0-\u1EF9]+$/)) {
+                e.target.setCustomValidity('Tên đăng nhập chỉ được chứa chữ cái, số, gạch dưới, gạch ngang.');
+            } else {
+                e.target.setCustomValidity('');
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTalk - Community</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+		:root {
+            --primary-color: #0d6efd;
+            --secondary-color: #d1e7ff;
+            --system-message-bg: #f0f8ff;
+            --danger-color: #dc3545;
+            --text-dark: #333;
+            --border-radius: 10px;
+            --chat-max-width: 1200px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f4f8 100%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .banner {
+            width: 100%;
+            height: 30vh;
+            max-height: 150px;
+            min-height: 200px;
+            background-image:
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 5px;
+        }
+        
+        .content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            margin-top: -50px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+         #chat-container {
+            width: 400px;
+            height: 650px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 60px rgba(20, 100, 200, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+			margin: 0 auto;
+        }
+
+        #chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        #chat-header h2 {
+            font-weight: 600;
+            margin: 0;
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s ease;
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+        }
+
+        #chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--background-light);
+        }
+
+        .message {
+            max-width: min(80%, 600px);
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: clamp(0.875rem, 1.5vw, 1rem);
+            position: relative;
+            word-wrap: break-word;
+        }
+		.message.sent {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+            margin-left: auto;
+            border-top-right-radius: 0;
+        }
+
+        .message.received {
+            background: #dff7d7;
+            color: #3d8b3d;
+            margin-right: auto;
+            border-top-left-radius: 0;
+        }
+
+        .message-sender {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        #input-container {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+            background: #f1f3f5;
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        #message-input {
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 12px 15px;
+            font-size: clamp(0.875rem, 1.5vw, 1rem);
+            outline: none;
+        }
+
+        #send-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: clamp(0.875rem, 1.5vw, 1rem);
+            white-space: nowrap;
+        }
+
+        .system-message {
+            background: var(--system-message-bg);
+            color: var(--text-dark);
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            margin: 10px auto;
+            font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+            max-width: 80%;
+        }
+
+        #phishing-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff5252;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            z-index: 100;
+            font-weight: 500;
+            display: none;
+            box-shadow: 0 10px 30px rgba(255, 82, 82, 0.3);
+            text-align: center;
+            width: min(90%, 400px);
+            font-size: clamp(0.875rem, 1.5vw, 1rem);
+        }
+
+        #phishing-confirmation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            z-index: 200;
+            text-align: center;
+            display: none;
+            width: min(90%, 400px);
+        }
+
+        #phishing-confirmation .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        #phishing-confirmation button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        #phishing-confirmation .delete-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        #phishing-confirmation .cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        #user-status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+		
+    </style>
+</head>
+<body>
+	<div class="banner"></div>
+
+    <div class="content">
+        <div id="chat-container">
+            <div id="chat-header">
+                <h2><i class="fas fa-comments"></i> EduTalk</h2>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </button>
+            </div>
+            <div id="chat-box"></div>
+            <div id="input-container">
+                <input type="text" id="message-input" placeholder="Nhập tin nhắn..." />
+                <button id="send-btn">
+                    Gửi <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="phishing-alert">Cảnh báo: Nghi ngờ URL lừa đảo!</div>
+
+    <div id="phishing-confirmation">
+        <h3>⚠️Nghi ngờ URL lừa đảo</h3>
+        <p>Bạn có muốn xóa tin nhắn chứa URL <span id="phishing-url" style="color: #0d6efd; word-wrap: break-word; font-weight: bold; background: #e7f1ff; padding: 2px 6px; border-radius: 5px;">[URL here]</span>không?</p>
+        <div class="confirmation-buttons">
+            <button class="delete-btn">Xóa tin nhắn</button>
+            <button class="cancel-btn">Hủy</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+		const socket = io();
+        const chatBox = document.getElementById("chat-box");
+        const messageInput = document.getElementById("message-input");
+        const sendBtn = document.getElementById("send-btn");
+        const phishingAlert = document.getElementById("phishing-alert");
+        const phishingConfirmation = document.getElementById("phishing-confirmation");
+        const phishingUrlSpan = document.getElementById("phishing-url");
+        const logoutBtn = document.querySelector(".logout-btn");
+        const username = "{{ username }}";
+
+        // Track joined users to prevent duplicate notifications
+        const joinedUsers = new Set();
+        let lastPhishingMessage = null;
+
+        // URL detection and conversion function
+        function convertUrlsToLinks(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, (url) => {
+                return `<a href="#" class="message-link" data-url="${url}">${url}</a>`;
+            });
+        }
+
+        function createUrlConfirmationDialog(url) {
+            const confirmationDialog = document.createElement('div');
+            confirmationDialog.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                z-index: 1000;
+                text-align: center;
+            `;
+
+            confirmationDialog.innerHTML = `
+                  <h3 style="color: #dc3545; margin-bottom: 15px;">⚠️ Cảnh báo truy cập URL</h3>
+                  <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Bạn có chắc chắn muốn truy cập URL sau không?</p>
+                  <p style="font-size: 14px; color: #6c757d; margin-bottom: 20px;">Vì lí do bảo mật, lưu ý không cung cấp thông tin cá nhân (mật khẩu, số điện thoại,...) để tránh mất tài khoản.</p>
+                  <p style="font-size: 18px; font-weight: bold; color: #0d6efd; word-wrap: break-word; margin-bottom: 20px;">${url}</p>
+                  <button id="confirm-url" style="background: #0d6efd; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-right: 10px;">Đồng ý</button>
+                  <button id="cancel-url" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">Hủy</button>
+            `;
+
+            document.body.appendChild(confirmationDialog);
+
+            const confirmButton = confirmationDialog.querySelector('#confirm-url');
+            const cancelButton = confirmationDialog.querySelector('#cancel-url');
+
+            confirmButton.addEventListener('click', () => {
+                window.open(url, '_blank');
+                document.body.removeChild(confirmationDialog);
+            });
+
+            cancelButton.addEventListener('click', () => {
+                document.body.removeChild(confirmationDialog);
+            });
+        }
+
+        function addSystemMessage(message) {
+            const systemMessage = document.createElement('div');
+            systemMessage.classList.add('system-message');
+            systemMessage.textContent = message;
+            chatBox.appendChild(systemMessage);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Simple URL detection regex
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const urls = message.match(urlRegex);
+
+            socket.emit('send_message', {
+                sender: username,
+                message: message,
+                urls: urls || [],
+                timestamp: new Date().toISOString()
+            });
+            messageInput.value = "";
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        socket.on('receive_message', (data) => {
+            const messageDiv = document.createElement('div');
+            const messageClass = data.sender === username ? 'sent' : 'received';
+            messageDiv.classList.add('message', messageClass);
+
+            // Convert URLs to clickable links
+            const messageWithLinks = convertUrlsToLinks(data.message);
+
+            messageDiv.innerHTML = `
+                <div class="message-sender">${data.sender}</div>
+                <div>${messageWithLinks}</div>
+            `;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Add click event to links
+            const links = messageDiv.querySelectorAll('.message-link');
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = e.target.getAttribute('data-url');
+                    createUrlConfirmationDialog(url);
+                });
+            });
+
+            // Phishing detection remains the same
+            if (data.phishing_detected && data.sender !== username) {
+                phishingAlert.textContent = `Cảnh báo: Nghi ngờ URL lừa đảo! (${data.phishing_urls})`;
+                phishingAlert.style.display = 'block';
+
+                lastPhishingMessage = {
+                    element: messageDiv,
+                    url: data.phishing_urls
+                };
+
+                setTimeout(() => {
+                    phishingAlert.style.display = 'none';
+                }, 5000);
+
+                phishingUrlSpan.textContent = data.phishing_urls;
+                phishingConfirmation.style.display = 'block';
+            }
+        });
+
+        // Phishing confirmation buttons
+        document.querySelector('.delete-btn').addEventListener('click', () => {
+            if (lastPhishingMessage) {
+                chatBox.removeChild(lastPhishingMessage.element);
+                phishingConfirmation.style.display = 'none';
+
+                socket.emit('delete_phishing_message', {
+                    url: lastPhishingMessage.url,
+                    sender: username
+                });
+
+                lastPhishingMessage = null;
+            }
+        });
+
+        document.querySelector('.cancel-btn').addEventListener('click', () => {
+            phishingConfirmation.style.display = 'none';
+            lastPhishingMessage = null;
+        });
+
+        // Thêm CSS cho liên kết
+        const linkStyle = document.createElement('style');
+        linkStyle.textContent = `
+            .message-link {
+                color: #0d6efd;
+                text-decoration: underline;
+                word-break: break-all;
+                cursor: pointer;
+            }
+            .message-link:hover {
+                color: #0056b3;
+            }
+        `;
+        document.head.appendChild(linkStyle);
+
+        // Socket connection and user joined events remain the same
+        socket.on('connect', () => {
+            socket.emit('user_joined', { username: username });
+        });
+
+        socket.on('user_joined', (data) => {
+            if (data.username !== username && !joinedUsers.has(data.username)) {
+                joinedUsers.add(data.username);
+                addSystemMessage(`${data.username} đã tham gia cuộc trò chuyện`);
+            }
+        });
+
+        // Logout handling
+        logoutBtn.addEventListener('click', () => {
+            fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Logout error:', error);
+            });
+        });
+
+        // User logout event
+        socket.on('user_logout', (data) => {
+            addSystemMessage(`${data.username} đã rời khỏi cuộc trò chuyện`);
+            joinedUsers.delete(data.username);
+        });
+    </script>
+</body>
+</html>
