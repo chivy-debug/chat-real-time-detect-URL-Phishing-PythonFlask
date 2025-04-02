@@ -1,0 +1,1 @@
+Ứng dụng chat real-time sử dụng mô hình NLP (Tranformers) để trích xuất URL từ đoạn hội thoại, sau đó đưa vào models ML/DL đã training trước đó để phân tích URL (https://github.com/chivy-debug/Detect_URL_Phishing_ML-DL.git)
